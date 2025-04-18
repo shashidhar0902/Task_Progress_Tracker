@@ -10,7 +10,7 @@ let tasks = [];
 
 // Load tasks from localStorage on page load
 function loadFromLocalStorage() {
-  const saved = localStorage.getItem('taskProgressData');
+  const saved = localStorage.getItem('counter');
   if (saved) {
     try {
       tasks = JSON.parse(saved);
@@ -22,7 +22,7 @@ function loadFromLocalStorage() {
 
 // Save tasks to localStorage
 function saveToLocalStorage() {
-  localStorage.setItem('taskProgressData', JSON.stringify(tasks));
+  localStorage.setItem('counter', JSON.stringify(tasks));
 }
 
 function updateProgressBarColor(progressBar, progress) {
@@ -48,7 +48,7 @@ function renderTasks() {
     remainingDaysSpan.style.marginLeft = '10px';
     remainingDaysSpan.style.fontWeight = '600';
     remainingDaysSpan.style.color = '#007bff';
-    remainingDaysSpan.textContent = `(${remainingDays} days left)`;
+    remainingDaysSpan.textContent = `(${remainingDays} Days left)`;
 
     taskNameDiv.appendChild(remainingDaysSpan);
     taskDiv.appendChild(taskNameDiv);
@@ -132,26 +132,24 @@ newTaskForm.addEventListener('submit', (e) => {
   }
 });
 
-//Remove save button event listener to disable manual save
 saveBtn.addEventListener('click', () => {
     if (tasks.length === 0) {
         alert('No tasks to save.');
         return;
     }
-  let csvContent = 'Task,Progress\n';
+  let csvContent = 'Task,Progress,Days\n';
   tasks.forEach(task => {
-    csvContent += task.name.replace(/"/g, '""') + ',' + task.progress + '\n';
+    csvContent += task.name.replace(/"/g, '""') + ',' + task.progress + ',' + task.days + '\n';
   });
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'task_progress.csv';
+  a.download = 'polity.csv';
   a.click();
   URL.revokeObjectURL(url);
 });
 
-// Remove load button event listener to disable manual load
 loadBtn.addEventListener('click', () => {
   fileInput.click();
 });
@@ -165,9 +163,9 @@ fileInput.addEventListener('change', (e) => {
     const lines = text.trim().split('\n');
     const loadedTasks = [];
     for (let i = 1; i < lines.length; i++) {
-      const [name, progress] = lines[i].split(',');
-      if (name && !isNaN(progress)) {
-        loadedTasks.push({ name: name.trim(), progress: Math.min(100, Math.max(0, Number(progress.trim()))), days: 1 });
+      const [name, progress, days] = lines[i].split(',');
+      if (name && !isNaN(progress) && !isNaN(days)) {
+        loadedTasks.push({ name: name.trim(), progress: Math.min(100, Math.max(0, Number(progress.trim()))), days: Math.max(1, Number(days.trim())) });
       }
     }
     tasks = loadedTasks;
@@ -180,7 +178,7 @@ fileInput.addEventListener('change', (e) => {
 
 // Add event listener for refresh button to clear localStorage and tasks
 refreshBtn.addEventListener('click', () => {
-  localStorage.removeItem('taskProgressData');
+  localStorage.removeItem('counter');
   tasks = [];
   renderTasks();
 });
