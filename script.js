@@ -145,7 +145,8 @@ saveBtn.addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'polity.csv';
+  name = prompt();
+  a.download = name+'.csv';
   a.click();
   URL.revokeObjectURL(url);
 });
